@@ -1,1 +1,51 @@
+# db03 5.9
+SELECT 
+    p.ProductID,
+    p.ProductName,
+    SUM(i.Quantity) AS TotalQuantity
+FROM Instock i
+JOIN Product p ON i.ProductID = p.ProductID
+GROUP BY p.ProductID, p.ProductName
+ORDER BY TotalQuantity DESC;
 
+# db03 5.10
+SELECT 
+    p.ProductID,
+    p.ProductName,
+    SUM(i.Quantity) AS TotalQuantity
+FROM Instock i
+JOIN Product p ON i.ProductID = p.ProductID
+GROUP BY p.ProductID, p.ProductName
+ORDER BY TotalQuantity DESC
+LIMIT 1;
+
+# db03 5.11
+SELECT w.WarehouseID, w.WarehouseAddress, w.CategoryID
+FROM Warehouse w
+WHERE NOT EXISTS (
+    SELECT p.ProductID
+    FROM Product p
+    WHERE p.CategoryID = w.CategoryID
+    AND NOT EXISTS (
+        SELECT 1
+        FROM Instock i
+        WHERE i.WarehouseID = w.WarehouseID
+        AND i.ProductID = p.ProductID
+    )
+);
+
+# db03 5.12
+SELECT w.WarehouseID, w.WarehouseAddress
+FROM Warehouse w
+WHERE w.CategoryID = 'C01'
+AND NOT EXISTS (
+    SELECT p.ProductID
+    FROM Product p
+    WHERE p.CategoryID = 'C01'
+    AND NOT EXISTS (
+        SELECT 1
+        FROM Instock i
+        WHERE i.WarehouseID = w.WarehouseID
+        AND i.ProductID = p.ProductID
+    )
+);
