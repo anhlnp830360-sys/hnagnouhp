@@ -1,14 +1,14 @@
-### db03 5.1
+##### db03 5.1
 SELECT ProductID, ProductName, UnitPrice
 FROM Product
 WHERE CategoryID = 'C02';
 
 
-### db03 5.9
-# đại số quan hệ
+##### db03 5.9
+### đại số quan hệ
 Product ⨝ (WarehouseID, ProductID, Quantity) Instock
 γ ProductID, SUM(Quantity) → TotalQuantity
-# sql
+### sql
 SELECT p.ProductID, p.ProductName, SUM(i.Quantity) AS TotalQuantity
 FROM Product p
 JOIN Instock i ON p.ProductID = i.ProductID
@@ -16,10 +16,10 @@ GROUP BY p.ProductID, p.ProductName
 ORDER BY p.ProductID;
 
 
-### db03 5.10
-# đại số quan hệ (dùng subquery)
+##### db03 5.10
+### đại số quan hệ (dùng subquery)
 γ ProductID, SUM(Quantity) → TotalQuantity (Instock)
-# sql (dùng subquery)
+### sql (dùng subquery)
 SELECT p.ProductID, p.ProductName, SUM(i.Quantity) AS TotalQuantity
 FROM Product p
 JOIN Instock i ON p.ProductID = i.ProductID
@@ -34,10 +34,10 @@ HAVING SUM(i.Quantity) = (
 );
 
 
-### db03 5.11
-# đại số quan hệ
+##### db03 5.11
+### đại số quan hệ
 Warehouse ⨝ (CategoryID = CategoryID) Category
-# sql
+### sql
 SELECT w.WarehouseID, w.WarehouseAddress, c.CategoryName
 FROM Warehouse w
 JOIN Category c ON w.CategoryID = c.CategoryID
@@ -54,12 +54,12 @@ WHERE NOT EXISTS (
 );
 
 
-### db03 5.12
-# đại số quan hệ
+##### db03 5.12
+### đại số quan hệ
 π WarehouseID (Warehouse) 
 ÷
 π ProductID (σ CategoryID='C01' (Product))
-# sql
+### sql
 SELECT w.WarehouseID, w.WarehouseAddress
 FROM Warehouse w
 WHERE NOT EXISTS (
@@ -75,7 +75,7 @@ WHERE NOT EXISTS (
 );
 
 
-### db03 5.19
+##### db03 5.19
 SELECT p.ProductID, p.ProductName, SUM(i.Quantity) AS TotalQuantity
 FROM Product p
 JOIN Instock i ON p.ProductID = i.ProductID
