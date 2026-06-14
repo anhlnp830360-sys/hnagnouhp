@@ -1,0 +1,16 @@
+SELECT 
+    WarehouseID, 
+    SUM(Quantity) AS TotalQuantity
+FROM 
+    Instock
+GROUP BY 
+    WarehouseID
+HAVING 
+    SUM(Quantity) = (
+        SELECT MAX(Total)
+        FROM (
+            SELECT SUM(Quantity) AS Total 
+            FROM Instock 
+            GROUP BY WarehouseID
+        ) AS SubTable
+    );
