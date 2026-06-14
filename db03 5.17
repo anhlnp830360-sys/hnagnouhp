@@ -1,0 +1,13 @@
+SELECT 
+    w.WarehouseID, 
+    w.WarehouseAddress, 
+    COUNT(i.ProductID) AS NumberOfProducts
+FROM 
+    Warehouse w
+INNER JOIN 
+    Instock i ON w.WarehouseID = i.WarehouseID
+GROUP BY 
+    w.WarehouseID, 
+    w.WarehouseAddress
+HAVING 
+    COUNT(i.ProductID) > 3;
