@@ -1,0 +1,11 @@
+SELECT 
+    p.ProductID,
+    p.ProductName,
+    p.UnitPrice,
+    p.CategoryID
+FROM Product p
+WHERE p.CategoryID IN (
+    SELECT w.CategoryID 
+    FROM Warehouse w 
+    WHERE w.WarehouseID = 'W01'
+);
