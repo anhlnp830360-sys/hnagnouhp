@@ -1,0 +1,7 @@
+SELECT I.ProductID,
+       P.ProductName,
+       SUM(P.UnitPrice * I.Quantity) AS TotalCost
+FROM Instock I
+JOIN Product P
+ON I.ProductID = P.ProductID
+GROUP BY I.ProductID, P.ProductName;
