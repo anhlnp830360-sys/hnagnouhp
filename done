@@ -232,6 +232,23 @@ LEFT JOIN
 GROUP BY 
     w.WarehouseID, 
     w.WarehouseAddress;
+5.8
+SELECT 
+    WarehouseID, 
+    COUNT(ProductID) AS ProductCount
+FROM 
+    Instock
+GROUP BY 
+    WarehouseID
+HAVING 
+    COUNT(ProductID) = (
+        SELECT MAX(SubCount)
+        FROM (
+            SELECT COUNT(ProductID) AS SubCount 
+            FROM Instock 
+            GROUP BY WarehouseID
+        ) AS SubTable
+    );
 5.9
 
 SELECT p.ProductID, p.ProductName, SUM(i.Quantity) AS TotalQuantity
