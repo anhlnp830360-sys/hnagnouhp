@@ -1,1 +1,80 @@
 
+5.9
+Product ⨝ (ProductID, SUM(Quantity) → TotalQuantity (Instock))
+SELECT p.ProductID, p.ProductName, SUM(i.Quantity) AS TotalQuantity
+FROM Product p
+JOIN Instock i ON p.ProductID = i.ProductID
+GROUP BY p.ProductID, p.ProductName
+ORDER BY p.ProductID;
+
+
+
+
+
+5.10
+Product ⨝ (ProductID, SUM(Quantity) → TotalQuantity (Instock))
+    ⌇ TotalQuantity = MAX(TotalQuantity)
+SELECT p.ProductID, p.ProductName, SUM(i.Quantity) AS TotalQuantity
+FROM Product p
+JOIN Instock i ON p.ProductID = i.ProductID
+GROUP BY p.ProductID, p.ProductName
+HAVING SUM(i.Quantity) = (
+    SELECT MAX(TotalQuantity)
+    FROM (
+        SELECT SUM(Quantity) AS TotalQuantity
+        FROM Instock
+        GROUP BY ProductID
+    ) AS SubQuery
+);
+
+
+5.11
+Warehouse ÷ (ProductID (σ CategoryID = CategoryID (Product)))
+SELECT w.WarehouseID, w.WarehouseAddress, c.CategoryName
+FROM Warehouse w
+JOIN Category c ON w.CategoryID = c.CategoryID
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM Product p
+    WHERE p.CategoryID = w.CategoryID
+    AND NOT EXISTS (
+        SELECT 1
+        FROM Instock i
+        WHERE i.WarehouseID = w.WarehouseID
+        AND i.ProductID = p.ProductID
+    )
+);
+
+
+5.12
+WarehouseID (Warehouse) ÷ ProductID (σ CategoryID='C01' (Product))
+SELECT w.WarehouseID, w.WarehouseAddress
+FROM Warehouse w
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM Product p
+    WHERE p.CategoryID = 'C01'
+    AND NOT EXISTS (
+        SELECT 1
+        FROM Instock i
+        WHERE i.WarehouseID = w.WarehouseID
+        AND i.ProductID = p.ProductID
+    )
+);
+
+5.19
+Product ⨝ (ProductID, SUM(Quantity) → TotalQuantity (Instock))
+⌇ TotalQuantity = MAX(TotalQuantity)
+
+SELECT p.ProductID, p.ProductName, SUM(i.Quantity) AS TotalQuantity
+FROM Product p
+JOIN Instock i ON p.ProductID = i.ProductID
+GROUP BY p.ProductID, p.ProductName
+HAVING SUM(i.Quantity) = (
+    SELECT MAX(TotalQuantity)
+    FROM (
+        SELECT SUM(Quantity) AS TotalQuantity
+        FROM Instock
+        GROUP BY ProductID
+    ) AS SubQuery
+);
