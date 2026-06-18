@@ -1,0 +1,6 @@
+SELECT 
+    i.WarehouseID,
+    AVG(i.Quantity) AS AverageQuantity
+FROM Instock i
+GROUP BY 
+    i.WarehouseID;
