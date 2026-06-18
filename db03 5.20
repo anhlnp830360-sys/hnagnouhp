@@ -1,0 +1,9 @@
+SELECT ProductID,
+       ProductName,
+       UnitPrice
+FROM Product
+WHERE UnitPrice >
+(
+    SELECT AVG(UnitPrice)
+    FROM Product
+);
