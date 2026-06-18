@@ -220,6 +220,18 @@ HAVING
             GROUP BY WarehouseID
         ) AS SubTable
     );
+5.7
+SELECT 
+    w.WarehouseID, 
+    w.WarehouseAddress, 
+    COUNT(i.ProductID) AS NumberOfProducts
+FROM 
+    Warehouse w
+LEFT JOIN 
+    Instock i ON w.WarehouseID = i.WarehouseID
+GROUP BY 
+    w.WarehouseID, 
+    w.WarehouseAddress;
 5.9
 
 SELECT p.ProductID, p.ProductName, SUM(i.Quantity) AS TotalQuantity
