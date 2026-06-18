@@ -190,6 +190,8 @@ BEGIN
 END$$
 
 DELIMITER ;
+______________________________________________________________
+
 5.9
 
 SELECT p.ProductID, p.ProductName, SUM(i.Quantity) AS TotalQuantity
