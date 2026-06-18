@@ -1,6 +1,197 @@
+-- =====================================================
+-- REQUIRE 2: CREATE DATABASE
+-- =====================================================
 
+DROP DATABASE IF EXISTS DB03;
+CREATE DATABASE DB03;
+USE DB03;
+
+-- =====================================================
+-- REQUIRE 3: CREATE TABLES
+-- =====================================================
+
+CREATE TABLE Category (
+    CategoryID VARCHAR(10) PRIMARY KEY,
+    CategoryName VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE Product (
+    ProductID VARCHAR(10) PRIMARY KEY,
+    ProductName VARCHAR(255) NOT NULL,
+    UnitPrice DECIMAL(10,2) NOT NULL CHECK (UnitPrice > 0),
+    CategoryID VARCHAR(10) NOT NULL,
+
+    FOREIGN KEY (CategoryID)
+        REFERENCES Category(CategoryID)
+);
+
+CREATE TABLE Warehouse (
+    WarehouseID VARCHAR(10) PRIMARY KEY,
+    WarehouseAddress VARCHAR(255) NOT NULL,
+    CategoryID VARCHAR(10) NOT NULL,
+
+    FOREIGN KEY (CategoryID)
+        REFERENCES Category(CategoryID)
+);
+
+CREATE TABLE Instock (
+    WarehouseID VARCHAR(10) NOT NULL,
+    ProductID VARCHAR(10) NOT NULL,
+    Quantity INT NOT NULL CHECK (Quantity >= 0),
+
+    PRIMARY KEY (WarehouseID, ProductID),
+
+    FOREIGN KEY (WarehouseID)
+        REFERENCES Warehouse(WarehouseID),
+
+    FOREIGN KEY (ProductID)
+        REFERENCES Product(ProductID)
+);
+
+-- =====================================================
+-- REQUIRE 4: INSERT DATA
+-- =====================================================
+
+INSERT INTO Category VALUES
+('C01','Beverage'),
+('C02','Food'),
+('C03','Electronic'),
+('C04','Household');
+
+INSERT INTO Product VALUES
+('P01','Coca-Cola Original 330ml',10000,'C01'),
+('P02','Pepsi Black 330ml',11000,'C01'),
+('P03','Red Bull Energy Drink 250ml',15000,'C01'),
+('P04','Aquafina Mineral Water 500ml',7000,'C01'),
+('P05','C2 Green Tea 455ml',10000,'C01'),
+
+('P06','Oreo Chocolate Cookies 133g',18000,'C02'),
+('P07','AFC Vegetable Crackers 200g',25000,'C02'),
+('P08','Kinh Do Sandwich Bread',15000,'C02'),
+('P09','Vifon Instant Noodles Beef Flavor',5000,'C02'),
+('P10','Choco Pie Original Box',42000,'C02'),
+
+('P11','Logitech M185 Wireless Mouse',185000,'C03'),
+('P12','Logitech K120 Keyboard',250000,'C03'),
+('P13','Kingston DataTraveler 64GB USB',160000,'C03'),
+('P14','Samsung EVO Plus 128GB MicroSD',320000,'C03'),
+('P15','Xiaomi 20000mAh Power Bank',450000,'C03'),
+
+('P16','Sunlight Lemon Dishwashing Liquid 750ml',42000,'C04'),
+('P17','OMO Matic Laundry Detergent 2kg',165000,'C04'),
+('P18','Pulppy Facial Tissue Box',28000,'C04'),
+('P19','Comfort Fabric Softener 800ml',55000,'C04'),
+('P20','Gift Garbage Bag Roll Large Size',25000,'C04');
+
+INSERT INTO Warehouse VALUES
+('W01','Thu Duc, Ho Chi Minh City','C01'),
+('W02','Cau Giay, Hanoi','C01'),
+('W03','Hai Chau, Da Nang','C02'),
+('W04','Ninh Kieu, Can Tho','C03'),
+('W05','Le Chan, Hai Phong','C04');
+
+INSERT INTO Instock VALUES
+
+-- W01 (C01)
+('W01','P01',100),
+('W01','P02',120),
+('W01','P03',80),
+('W01','P04',20),
+('W01','P05',90),
+
+-- W02 (C01)
+('W02','P01',60),
+('W02','P02',70),
+('W02','P05',15),
+
+-- W03 (C02)
+('W03','P06',250),
+('W03','P07',180),
+('W03','P08',120),
+('W03','P09',300),
+('W03','P10',150),
+
+-- W04 (C03)
+('W04','P11',70),
+('W04','P12',150),
+('W04','P13',90),
+('W04','P14',40),
+('W04','P15',30),
+
+-- W05 (C04)
+('W05','P16',100),
+('W05','P17',80),
+('W05','P18',150),
+('W05','P19',120),
+('W05','P20',90);
+
+-- =====================================================
+-- BUSINESS RULE
+-- A warehouse can only store products
+-- belonging to its own category.
+-- =====================================================
+
+DELIMITER $$
+
+CREATE TRIGGER trg_CheckCategory_Insert
+BEFORE INSERT ON Instock
+FOR EACH ROW
+BEGIN
+
+    DECLARE v_ProductCategory VARCHAR(10);
+    DECLARE v_WarehouseCategory VARCHAR(10);
+
+    SELECT CategoryID
+    INTO v_ProductCategory
+    FROM Product
+    WHERE ProductID = NEW.ProductID;
+
+    SELECT CategoryID
+    INTO v_WarehouseCategory
+    FROM Warehouse
+    WHERE WarehouseID = NEW.WarehouseID;
+
+    IF v_ProductCategory <> v_WarehouseCategory THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT =
+        'Product category must match warehouse category';
+    END IF;
+
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
+
+CREATE TRIGGER trg_CheckCategory_Update
+BEFORE UPDATE ON Instock
+FOR EACH ROW
+BEGIN
+
+    DECLARE v_ProductCategory VARCHAR(10);
+    DECLARE v_WarehouseCategory VARCHAR(10);
+
+    SELECT CategoryID
+    INTO v_ProductCategory
+    FROM Product
+    WHERE ProductID = NEW.ProductID;
+
+    SELECT CategoryID
+    INTO v_WarehouseCategory
+    FROM Warehouse
+    WHERE WarehouseID = NEW.WarehouseID;
+
+    IF v_ProductCategory <> v_WarehouseCategory THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT =
+        'Product category must match warehouse category';
+    END IF;
+
+END$$
+
+DELIMITER ;
 5.9
-Product ⨝ (ProductID, SUM(Quantity) → TotalQuantity (Instock))
+
 SELECT p.ProductID, p.ProductName, SUM(i.Quantity) AS TotalQuantity
 FROM Product p
 JOIN Instock i ON p.ProductID = i.ProductID
@@ -12,8 +203,7 @@ ORDER BY p.ProductID;
 
 
 5.10
-Product ⨝ (ProductID, SUM(Quantity) → TotalQuantity (Instock))
-    ⌇ TotalQuantity = MAX(TotalQuantity)
+
 SELECT p.ProductID, p.ProductName, SUM(i.Quantity) AS TotalQuantity
 FROM Product p
 JOIN Instock i ON p.ProductID = i.ProductID
@@ -29,7 +219,7 @@ HAVING SUM(i.Quantity) = (
 
 
 5.11
-Warehouse ÷ (ProductID (σ CategoryID = CategoryID (Product)))
+
 SELECT w.WarehouseID, w.WarehouseAddress, c.CategoryName
 FROM Warehouse w
 JOIN Category c ON w.CategoryID = c.CategoryID
@@ -47,7 +237,7 @@ WHERE NOT EXISTS (
 
 
 5.12
-WarehouseID (Warehouse) ÷ ProductID (σ CategoryID='C01' (Product))
+
 SELECT w.WarehouseID, w.WarehouseAddress
 FROM Warehouse w
 WHERE NOT EXISTS (
@@ -63,7 +253,7 @@ WHERE NOT EXISTS (
 );
 
 5.19
-Product ⨝ (ProductID, SUM(Quantity) → TotalQuantity (Instock))
+
 ⌇ TotalQuantity = MAX(TotalQuantity)
 
 SELECT p.ProductID, p.ProductName, SUM(i.Quantity) AS TotalQuantity
