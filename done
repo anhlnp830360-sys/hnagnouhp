@@ -310,10 +310,22 @@ WHERE NOT EXISTS (
         AND i.ProductID = p.ProductID
     )
 );
+5.17
+SELECT 
+    w.WarehouseID, 
+    w.WarehouseAddress, 
+   COUNT(DISTINCT i.ProductID) AS NumberOfProducts
+FROM 
+    Warehouse w
+INNER JOIN 
+    Instock i ON w.WarehouseID = i.WarehouseID
+GROUP BY 
+    w.WarehouseID, 
+    w.WarehouseAddress
+HAVING 
+    COUNT(i.ProductID) > 3;
 
 5.19
-
-⌇ TotalQuantity = MAX(TotalQuantity)
 
 SELECT p.ProductID, p.ProductName, SUM(i.Quantity) AS TotalQuantity
 FROM Product p
