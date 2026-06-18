@@ -191,6 +191,17 @@ END$$
 
 DELIMITER ;
 ______________________________________________________________
+SELECT 
+    w.WarehouseID, 
+    w.WarehouseAddress, 
+    SUM(i.Quantity) AS TotalQuantity
+FROM 
+    Warehouse w
+LEFT JOIN 
+    Instock i ON w.WarehouseID = i.WarehouseID
+GROUP BY 
+    w.WarehouseID, 
+    w.WarehouseAddress;
 
 5.9
 
