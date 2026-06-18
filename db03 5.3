@@ -1,0 +1,7 @@
+SELECT 
+    w.WarehouseID,
+    w.WarehouseAddress,
+    w.CategoryID
+FROM Warehouse w
+JOIN Category c ON w.CategoryID = c.CategoryID
+WHERE c.CategoryName = 'Beverage';
