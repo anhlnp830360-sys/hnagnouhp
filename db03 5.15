@@ -1,0 +1,22 @@
+SELECT CostForWarehouse('W01');
+DELIMITER $$
+
+CREATE FUNCTION CostForWarehouse(WID VARCHAR(10))
+RETURNS DECIMAL(15,2)
+DETERMINISTIC
+
+BEGIN
+    DECLARE Total DECIMAL(15,2);
+
+    SELECT SUM(P.UnitPrice * I.Quantity)
+    INTO Total
+    FROM Instock I
+    JOIN Product P
+    ON I.ProductID = P.ProductID
+    WHERE I.WarehouseID = WID;
+
+    RETURN Total;
+END$$
+
+DELIMITER ;
+SELECT CostForWarehouse('W01');
