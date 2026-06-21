@@ -1,13 +1,11 @@
-SELECT 
-    w.WarehouseID, 
-    w.WarehouseAddress, 
-   COUNT(DISTINCT i.ProductID) AS NumberOfProducts
-FROM 
-    Warehouse w
-INNER JOIN 
-    Instock i ON w.WarehouseID = i.WarehouseID
-GROUP BY 
-    w.WarehouseID, 
+SELECT
+    w.WarehouseID,
+    w.WarehouseAddress,
+    COUNT(DISTINCT i.ProductID) AS NumberOfProducts
+FROM Warehouse w
+JOIN Instock i
+    ON w.WarehouseID = i.WarehouseID
+GROUP BY
+    w.WarehouseID,
     w.WarehouseAddress
-HAVING 
-    COUNT(i.ProductID) > 3;
+HAVING COUNT(DISTINCT i.ProductID) > 3;
