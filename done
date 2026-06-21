@@ -407,19 +407,15 @@ FROM Instock i
 GROUP BY 
     i.WarehouseID;
 5.19
-
-SELECT p.ProductID, p.ProductName, SUM(i.Quantity) AS TotalQuantity
+SELECT
+    p.ProductID,
+    p.ProductName,
+    SUM(i.Quantity) AS TotalQuantity
 FROM Product p
-JOIN Instock i ON p.ProductID = i.ProductID
+JOIN Instock i
+    ON p.ProductID = i.ProductID
 GROUP BY p.ProductID, p.ProductName
-HAVING SUM(i.Quantity) = (
-    SELECT MAX(TotalQuantity)
-    FROM (
-        SELECT SUM(Quantity) AS TotalQuantity
-        FROM Instock
-        GROUP BY ProductID
-    ) AS SubQuery
-);
+HAVING SUM(i.Quantity) > 100;
 5.20
 SELECT ProductID,
        ProductName,
