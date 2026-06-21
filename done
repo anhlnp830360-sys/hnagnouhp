@@ -378,28 +378,26 @@ END$$
 
 DELIMITER ;
 5.15
-SELECT CostForWarehouse('W01');
 DELIMITER $$
 
 CREATE FUNCTION CostForWarehouse(WID VARCHAR(10))
 RETURNS DECIMAL(15,2)
 DETERMINISTIC
-
 BEGIN
-    DECLARE Total DECIMAL(15,2);
+    DECLARE TotalCost DECIMAL(15,2);
 
-    SELECT SUM(P.UnitPrice * I.Quantity)
-    INTO Total
+    SELECT
+        SUM(P.UnitPrice * I.Quantity)
+    INTO TotalCost
     FROM Instock I
     JOIN Product P
-    ON I.ProductID = P.ProductID
+        ON I.ProductID = P.ProductID
     WHERE I.WarehouseID = WID;
 
-    RETURN Total;
+    RETURN IFNULL(TotalCost,0);
 END$$
 
 DELIMITER ;
-SELECT CostForWarehouse('W01');
 5.16
 SELECT ProductID, ProductName
 FROM Product
@@ -409,19 +407,17 @@ WHERE ProductID NOT IN (
     WHERE WarehouseID = 'W01'
 );
 5.17
-SELECT 
-    w.WarehouseID, 
-    w.WarehouseAddress, 
-   COUNT(DISTINCT i.ProductID) AS NumberOfProducts
-FROM 
-    Warehouse w
-INNER JOIN 
-    Instock i ON w.WarehouseID = i.WarehouseID
-GROUP BY 
-    w.WarehouseID, 
+SELECT
+    w.WarehouseID,
+    w.WarehouseAddress,
+    COUNT(DISTINCT i.ProductID) AS NumberOfProducts
+FROM Warehouse w
+JOIN Instock i
+    ON w.WarehouseID = i.WarehouseID
+GROUP BY
+    w.WarehouseID,
     w.WarehouseAddress
-HAVING 
-    COUNT(i.ProductID) > 3;
+HAVING COUNT(DISTINCT i.ProductID) > 3;
 5.18
 SELECT 
     i.WarehouseID,
