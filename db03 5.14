@@ -5,3 +5,20 @@ FROM Instock I
 JOIN Product P
 ON I.ProductID = P.ProductID
 GROUP BY I.ProductID, P.ProductName;
+sửa 5.14
+DELIMITER $$
+
+CREATE PROCEDURE CostForEach()
+BEGIN
+    SELECT
+        I.WarehouseID,
+        SUM(P.UnitPrice * I.Quantity) AS TotalCost
+    FROM Instock I
+    JOIN Product P
+        ON I.ProductID = P.ProductID
+    GROUP BY I.WarehouseID
+    ORDER BY I.WarehouseID;
+END$$
+
+DELIMITER ;
+CALL CostForEach();
