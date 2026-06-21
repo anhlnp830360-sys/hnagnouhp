@@ -362,13 +362,21 @@ END$$
 
 DELIMITER ;
 5.14
-SELECT I.ProductID,
-       P.ProductName,
-       SUM(P.UnitPrice * I.Quantity) AS TotalCost
-FROM Instock I
-JOIN Product P
-ON I.ProductID = P.ProductID
-GROUP BY I.ProductID, P.ProductName;
+DELIMITER $$
+
+CREATE PROCEDURE CostForEach()
+BEGIN
+    SELECT
+        I.WarehouseID,
+        SUM(P.UnitPrice * I.Quantity) AS TotalCost
+    FROM Instock I
+    JOIN Product P
+        ON I.ProductID = P.ProductID
+    GROUP BY I.WarehouseID
+    ORDER BY I.WarehouseID;
+END$$
+
+DELIMITER ;
 5.15
 SELECT CostForWarehouse('W01');
 DELIMITER $$
