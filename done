@@ -378,6 +378,13 @@ END$$
 DELIMITER ;
 SELECT CostForWarehouse('W01');
 5.16
+SELECT ProductID, ProductName
+FROM Product
+WHERE ProductID NOT IN (
+    SELECT ProductID
+    FROM Instock
+    WHERE WarehouseID = 'W01'
+);
 5.17
 SELECT 
     w.WarehouseID, 
