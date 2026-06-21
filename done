@@ -191,6 +191,15 @@ END$$
 
 DELIMITER ;
 ______________________________________________________________
+5.1
+SELECT 
+    p.ProductID,
+    p.ProductName,
+    p.UnitPrice,
+    p.CategoryID
+FROM Product p
+WHERE p.CategoryID = 'C02';
+
 5.5
 SELECT 
     w.WarehouseID, 
