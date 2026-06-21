@@ -199,7 +199,15 @@ SELECT
     p.CategoryID
 FROM Product p
 WHERE p.CategoryID = 'C02';
-
+5.2
+SELECT 
+    w.WarehouseID,
+    w.WarehouseAddress,
+    w.CategoryID
+FROM Warehouse w
+WHERE w.CategoryID = 'C01';
+5.3
+5.4
 5.5
 SELECT 
     w.WarehouseID, 
