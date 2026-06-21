@@ -1,1 +1,48 @@
-
+5.4 dùng jion
+SELECT p.*
+FROM Product p
+JOIN Warehouse w
+ON p.CategoryID = w.CategoryID
+WHERE w.WarehouseID='W01';
+5.6 dùng order by
+SELECT WarehouseID,
+       SUM(Quantity) AS TotalQuantity
+FROM Instock
+GROUP BY WarehouseID
+ORDER BY TotalQuantity DESC
+LIMIT 1;
+5.10 dùng order by
+SELECT p.ProductID,
+       p.ProductName,
+       SUM(i.Quantity) AS TotalQuantity
+FROM Product p
+JOIN Instock i
+ON p.ProductID=i.ProductID
+GROUP BY p.ProductID,p.ProductName
+ORDER BY TotalQuantity DESC
+LIMIT 1;
+5.11 dùng group by + count
+SELECT w.WarehouseID
+FROM Warehouse w
+JOIN Instock i
+ON w.WarehouseID = i.WarehouseID
+GROUP BY w.WarehouseID, w.CategoryID
+HAVING COUNT(DISTINCT i.ProductID) =
+(
+    SELECT COUNT(*)
+    FROM Product p
+    WHERE p.CategoryID = w.CategoryID
+);
+5.12 dùng group by+ having
+SELECT i.WarehouseID
+FROM Instock i
+JOIN Product p
+ON i.ProductID=p.ProductID
+WHERE p.CategoryID='C01'
+GROUP BY i.WarehouseID
+HAVING COUNT(DISTINCT i.ProductID)=
+(
+    SELECT COUNT(*)
+    FROM Product
+    WHERE CategoryID='C01'
+);
