@@ -13,3 +13,20 @@ END$$
 
 DELIMITER ;
 CALL CostWarehouse();
+sửa 5.13
+DELIMITER $$
+
+CREATE PROCEDURE CostWarehouse()
+BEGIN
+    SELECT
+        I.WarehouseID,
+        SUM(P.UnitPrice * I.Quantity) AS TotalCost
+    FROM Instock I
+    JOIN Product P
+        ON I.ProductID = P.ProductID
+    WHERE I.WarehouseID = 'W01'
+    GROUP BY I.WarehouseID;
+END$$
+
+DELIMITER ;
+CALL CostWarehouse();
