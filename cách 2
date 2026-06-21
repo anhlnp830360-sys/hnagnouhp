@@ -1,10 +1,66 @@
-5.4 dùng jion
+5.4 dùng join
 SELECT p.*
 FROM Product p
 JOIN Warehouse w
 ON p.CategoryID = w.CategoryID
 WHERE w.WarehouseID='W01';
+giải thích+ ý tưởng 
+ý tưởng 
+cách 1
+Tìm Category của W01 trước
+↓
+Lấy các Product thuộc Category đó
+cách 2
+Ghép Product với Warehouse theo CategoryID
+↓
+Lọc WarehouseID = W01
+↓
+Những Product ghép được chính là các sản phẩm được phép lưu
+khác biệt
+Cách 1: đi tìm Category trước
+Cách 2: ghép trực tiếp Product và Warehouse
+Giải thích
+Kho W01 thuộc category C01.
+Warehouse(W01) → CategoryID = C01
+Sản phẩm được phép lưu trong kho nếu:
+Product.CategoryID = Warehouse.CategoryID
+Do đó ta JOIN Product với Warehouse theo CategoryID rồi lọc WarehouseID='W01'.
+Kết quả trả về toàn bộ sản phẩm thuộc category C01.
+
 5.6 dùng order by
+giải thích+ ý tưởng 
+Giải thích
+
+Bước 1:
+GROUP BY WarehouseID
+tính tổng số lượng của từng kho.
+Bước 2:
+ORDER BY TotalQuantity DESC
+sắp xếp từ lớn xuống nhỏ.
+Bước 3:
+LIMIT 1
+lấy kho đứng đầu.
+Kết quả là kho có tổng số lượng lớn nhất.
+Cách 2 ngắn gọn hơn nhưng có thể bỏ sót trường hợp nhiều kho cùng hạng nhất.
+ý tưởng 
+Cách 1 (MAX + Subquery)
+Ý tưởng:
+Tính tổng số lượng từng kho
+↓
+Tìm giá trị lớn nhất
+↓
+Lấy kho có giá trị đó
+Cách 2 (ORDER BY)
+Ý tưởng:
+Tính tổng số lượng từng kho
+↓
+Sắp xếp giảm dần
+↓
+Lấy dòng đầu tiên
+Khác nhau:
+Cách 1 tìm giá trị lớn nhất trước
+Cách 2 sắp xếp rồi lấy phần tử đầu
+
 SELECT WarehouseID,
        SUM(Quantity) AS TotalQuantity
 FROM Instock
@@ -12,6 +68,35 @@ GROUP BY WarehouseID
 ORDER BY TotalQuantity DESC
 LIMIT 1;
 5.10 dùng order by
+giải thích+ ý tưởng 
+Giải thích
+Đầu tiên:
+SUM(i.Quantity)
+tính tổng tồn kho của từng sản phẩm.
+Tiếp theo:
+ORDER BY TotalQuantity DESC
+sắp xếp giảm dần theo tổng tồn kho.
+Cuối cùng:
+LIMIT 1
+lấy sản phẩm có tổng tồn kho lớn nhất.
+Cách 1 (MAX + Subquery)
+Ý tưởng
+Tính tổng tồn kho từng sản phẩm
+↓
+Tìm giá trị lớn nhất
+↓
+Lấy sản phẩm có giá trị đó
+Cách 2 (ORDER BY)
+Ý tưởng:
+Tính tổng tồn kho từng sản phẩm
+↓
+Sắp xếp giảm dần
+↓
+Lấy sản phẩm đầu tiên
+Khác biệt:
+Cách 1 dựa vào MAX
+Cách 2 dựa vào sắp xếp
+
 SELECT p.ProductID,
        p.ProductName,
        SUM(i.Quantity) AS TotalQuantity
@@ -22,6 +107,58 @@ GROUP BY p.ProductID,p.ProductName
 ORDER BY TotalQuantity DESC
 LIMIT 1;
 5.11 dùng group by + count
+Ý tưởng:
+Đếm:
+Số sản phẩm hiện có trong kho
+và so sánh với:
+Tổng số sản phẩm thuộc category của kho
+Nếu hai số bằng nhau:
+Kho đã chứa đầy đủ tất cả sản phẩm mà nó được phép lưu.
+Ví dụ:
+Kho W01 thuộc C01.
+Category C01 có:
+P01 P02 P03 P04 P05
+Kho W01 cũng có:
+P01 P02 P03 P04 P05
+=> đủ.
+Cách 1 (NOT EXISTS)
+
+Ý tưởng:
+
+Duyệt tất cả sản phẩm thuộc Category của kho
+↓
+Kiểm tra có sản phẩm nào chưa xuất hiện trong kho không
+↓
+Nếu không có sản phẩm nào bị thiếu
+=> kho đạt yêu cầu
+
+Nói ngắn gọn:
+
+Tìm sản phẩm bị thiếu.
+Không thiếu sản phẩm nào => đạt.
+Cách 2 (COUNT)
+
+Ý tưởng:
+
+Đếm số sản phẩm hiện có trong kho
+↓
+Đếm tổng số sản phẩm thuộc Category của kho
+↓
+So sánh hai số
+
+Nếu:
+
+2 số bằng nhau
+
+thì:
+
+Kho đã chứa đầy đủ sản phẩm được phép lưu
+
+Khác nhau:
+
+Cách 1 kiểm tra sự thiếu hụt
+Cách 2 kiểm tra bằng số lượng
+
 SELECT w.WarehouseID
 FROM Warehouse w
 JOIN Instock i
@@ -34,6 +171,51 @@ HAVING COUNT(DISTINCT i.ProductID) =
     WHERE p.CategoryID = w.CategoryID
 );
 5.12 dùng group by+ having
+Giải thích
+Bước 1:
+WHERE p.CategoryID='C01'
+chỉ lấy các sản phẩm thuộc C01.
+Bước 2:
+COUNT(DISTINCT i.ProductID)
+đếm số sản phẩm C01 trong từng kho.
+Bước 3:
+SELECT COUNT(*)
+FROM Product
+WHERE CategoryID='C01'
+đếm tổng số sản phẩm của category C01.
+Bước 4:
+HAVING
+so sánh hai giá trị.
+Nếu bằng nhau:
+Kho đó chứa toàn bộ sản phẩm của category C01.
+Cách 1 (NOT EXISTS)
+
+Ý tưởng:
+
+Xét tất cả sản phẩm của C01
+↓
+Kiểm tra kho có thiếu sản phẩm nào không
+↓
+Nếu không thiếu
+=> kho đạt yêu cầu
+Cách 2 (COUNT)
+
+Ý tưởng:
+
+Đếm số sản phẩm C01 trong kho
+↓
+Đếm tổng số sản phẩm C01 trong hệ thống
+↓
+So sánh hai số
+
+Nếu:
+
+bằng nhau
+
+thì:
+
+Kho chứa toàn bộ sản phẩm của C01
+
 SELECT i.WarehouseID
 FROM Instock i
 JOIN Product p
