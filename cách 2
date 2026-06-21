@@ -1,230 +1,100 @@
-5.4 dùng join
-SELECT p.*
-FROM Product p
-JOIN Warehouse w
-ON p.CategoryID = w.CategoryID
-WHERE w.WarehouseID='W01';
-giải thích+ ý tưởng 
-ý tưởng 
-cách 1
-Tìm Category của W01 trước
-↓
-Lấy các Product thuộc Category đó
-cách 2
-Ghép Product với Warehouse theo CategoryID
-↓
-Lọc WarehouseID = W01
-↓
-Những Product ghép được chính là các sản phẩm được phép lưu
-khác biệt
-Cách 1: đi tìm Category trước
-Cách 2: ghép trực tiếp Product và Warehouse
-Giải thích
-Kho W01 thuộc category C01.
-Warehouse(W01) → CategoryID = C01
-Sản phẩm được phép lưu trong kho nếu:
-Product.CategoryID = Warehouse.CategoryID
-Do đó ta JOIN Product với Warehouse theo CategoryID rồi lọc WarehouseID='W01'.
-Kết quả trả về toàn bộ sản phẩm thuộc category C01.
+1. Câu 5.11: Kho hàng nào hiện đang chứa ĐẦY ĐỦ tất cả các sản phẩm mà nó được phép lưu trữ?
+Ý tưởng Cách 2: Ở Cách 1, chúng ta dùng 2 lần NOT EXISTS (tìm kho không có sản phẩm nào thuộc danh mục mà nó không chứa) - tư duy này rất xoắn não.
+Với Cách 2, ta dùng toán học cơ bản:
 
-5.6 dùng order by
-giải thích+ ý tưởng 
-Giải thích
+Đếm tổng số lượng loại sản phẩm thuộc danh mục đó (Ví dụ: danh mục C01 có tổng cộng 5 sản phẩm).
 
-Bước 1:
-GROUP BY WarehouseID
-tính tổng số lượng của từng kho.
-Bước 2:
-ORDER BY TotalQuantity DESC
-sắp xếp từ lớn xuống nhỏ.
-Bước 3:
-LIMIT 1
-lấy kho đứng đầu.
-Kết quả là kho có tổng số lượng lớn nhất.
-Cách 2 ngắn gọn hơn nhưng có thể bỏ sót trường hợp nhiều kho cùng hạng nhất.
-ý tưởng 
-Cách 1 (MAX + Subquery)
-Ý tưởng:
-Tính tổng số lượng từng kho
-↓
-Tìm giá trị lớn nhất
-↓
-Lấy kho có giá trị đó
-Cách 2 (ORDER BY)
-Ý tưởng:
-Tính tổng số lượng từng kho
-↓
-Sắp xếp giảm dần
-↓
-Lấy dòng đầu tiên
-Khác nhau:
-Cách 1 tìm giá trị lớn nhất trước
-Cách 2 sắp xếp rồi lấy phần tử đầu
+Đếm số loại sản phẩm mà kho đó thực sự đang chứa.
 
-SELECT WarehouseID,
-       SUM(Quantity) AS TotalQuantity
-FROM Instock
-GROUP BY WarehouseID
-ORDER BY TotalQuantity DESC
-LIMIT 1;
-5.10 dùng order by
-giải thích+ ý tưởng 
-Giải thích
-Đầu tiên:
-SUM(i.Quantity)
-tính tổng tồn kho của từng sản phẩm.
-Tiếp theo:
-ORDER BY TotalQuantity DESC
-sắp xếp giảm dần theo tổng tồn kho.
-Cuối cùng:
-LIMIT 1
-lấy sản phẩm có tổng tồn kho lớn nhất.
-Cách 1 (MAX + Subquery)
-Ý tưởng
-Tính tổng tồn kho từng sản phẩm
-↓
-Tìm giá trị lớn nhất
-↓
-Lấy sản phẩm có giá trị đó
-Cách 2 (ORDER BY)
-Ý tưởng:
-Tính tổng tồn kho từng sản phẩm
-↓
-Sắp xếp giảm dần
-↓
-Lấy sản phẩm đầu tiên
-Khác biệt:
-Cách 1 dựa vào MAX
-Cách 2 dựa vào sắp xếp
+Nếu hai con số này bằng nhau, nghĩa là kho đó chứa đầy đủ!
 
-SELECT p.ProductID,
-       p.ProductName,
-       SUM(i.Quantity) AS TotalQuantity
-FROM Product p
-JOIN Instock i
-ON p.ProductID=i.ProductID
-GROUP BY p.ProductID,p.ProductName
-ORDER BY TotalQuantity DESC
-LIMIT 1;
-5.11 dùng group by + count
-Ý tưởng:
-Đếm:
-Số sản phẩm hiện có trong kho
-và so sánh với:
-Tổng số sản phẩm thuộc category của kho
-Nếu hai số bằng nhau:
-Kho đã chứa đầy đủ tất cả sản phẩm mà nó được phép lưu.
-Ví dụ:
-Kho W01 thuộc C01.
-Category C01 có:
-P01 P02 P03 P04 P05
-Kho W01 cũng có:
-P01 P02 P03 P04 P05
-=> đủ.
-Cách 1 (NOT EXISTS)
-
-Ý tưởng:
-
-Duyệt tất cả sản phẩm thuộc Category của kho
-↓
-Kiểm tra có sản phẩm nào chưa xuất hiện trong kho không
-↓
-Nếu không có sản phẩm nào bị thiếu
-=> kho đạt yêu cầu
-
-Nói ngắn gọn:
-
-Tìm sản phẩm bị thiếu.
-Không thiếu sản phẩm nào => đạt.
-Cách 2 (COUNT)
-
-Ý tưởng:
-
-Đếm số sản phẩm hiện có trong kho
-↓
-Đếm tổng số sản phẩm thuộc Category của kho
-↓
-So sánh hai số
-
-Nếu:
-
-2 số bằng nhau
-
-thì:
-
-Kho đã chứa đầy đủ sản phẩm được phép lưu
-
-Khác nhau:
-
-Cách 1 kiểm tra sự thiếu hụt
-Cách 2 kiểm tra bằng số lượng
-
-SELECT w.WarehouseID
+Mã SQL (Cách 2 - Dùng Gom nhóm và Đếm):
+SQL
+SELECT 
+    w.WarehouseID, 
+    w.WarehouseAddress
 FROM Warehouse w
-JOIN Instock i
-ON w.WarehouseID = i.WarehouseID
-GROUP BY w.WarehouseID, w.CategoryID
-HAVING COUNT(DISTINCT i.ProductID) =
-(
-    SELECT COUNT(*)
-    FROM Product p
-    WHERE p.CategoryID = w.CategoryID
-);
-5.12 dùng group by+ having
-Giải thích
-Bước 1:
-WHERE p.CategoryID='C01'
-chỉ lấy các sản phẩm thuộc C01.
-Bước 2:
-COUNT(DISTINCT i.ProductID)
-đếm số sản phẩm C01 trong từng kho.
-Bước 3:
-SELECT COUNT(*)
-FROM Product
-WHERE CategoryID='C01'
-đếm tổng số sản phẩm của category C01.
-Bước 4:
-HAVING
-so sánh hai giá trị.
-Nếu bằng nhau:
-Kho đó chứa toàn bộ sản phẩm của category C01.
-Cách 1 (NOT EXISTS)
+-- Kết nối để lấy toàn bộ danh sách sản phẩm thuộc danh mục của kho
+JOIN Product p ON w.CategoryID = p.CategoryID
+-- Kết nối với bảng Instock để xem kho đang thực sự giữ những sản phẩm nào
+LEFT JOIN Instock i ON w.WarehouseID = i.WarehouseID AND p.ProductID = i.ProductID
+GROUP BY w.WarehouseID, w.WarehouseAddress
+-- Điều kiện then chốt: So sánh 2 con số
+HAVING COUNT(p.ProductID) = COUNT(i.ProductID);
+Giải thích chi tiết:
 
-Ý tưởng:
+JOIN Product p: Tìm tất cả các sản phẩm lý thuyết mà kho phải chứa (cùng CategoryID).
 
-Xét tất cả sản phẩm của C01
-↓
-Kiểm tra kho có thiếu sản phẩm nào không
-↓
-Nếu không thiếu
-=> kho đạt yêu cầu
-Cách 2 (COUNT)
+LEFT JOIN Instock i: Đối chiếu với thực tế xem kho có chứa sản phẩm đó không. Nếu không chứa, i.ProductID sẽ mang giá trị NULL.
 
-Ý tưởng:
+COUNT(p.ProductID): Đếm số sản phẩm lý thuyết (đếm cả thảy).
 
-Đếm số sản phẩm C01 trong kho
-↓
-Đếm tổng số sản phẩm C01 trong hệ thống
-↓
-So sánh hai số
+COUNT(i.ProductID): Đếm số sản phẩm thực tế (hàm COUNT trong SQL sẽ tự động bỏ qua các dòng NULL).
 
-Nếu:
+HAVING ... = ...: Lọc ra kho nào có số thực tế bằng đúng số lý thuyết.
 
-bằng nhau
+2. Câu 5.12: Kho hàng nào lưu trữ TẤT CẢ các sản phẩm thuộc danh mục 'C01'
+Ý tưởng Cách 2: Hoàn toàn tương tự câu 5.11, ta chỉ cần đếm xem danh mục 'C01' có tất cả bao nhiêu sản phẩm trên hệ thống. Sau đó, ta lọc các kho đang chứa sản phẩm 'C01', đếm số lượng mặt hàng 'C01' trong kho đó và so sánh với con số tổng kia.
 
-thì:
-
-Kho chứa toàn bộ sản phẩm của C01
-
+Mã SQL (Cách 2 - Dùng Sub-query so sánh COUNT):
+SQL
 SELECT i.WarehouseID
 FROM Instock i
-JOIN Product p
-ON i.ProductID=p.ProductID
-WHERE p.CategoryID='C01'
+JOIN Product p ON i.ProductID = p.ProductID
+WHERE p.CategoryID = 'C01'
 GROUP BY i.WarehouseID
-HAVING COUNT(DISTINCT i.ProductID)=
-(
-    SELECT COUNT(*)
-    FROM Product
-    WHERE CategoryID='C01'
+HAVING COUNT(DISTINCT i.ProductID) = (
+    -- Sub-query đếm tổng số sản phẩm có mã C01
+    SELECT COUNT(*) 
+    FROM Product 
+    WHERE CategoryID = 'C01'
 );
+Giải thích chi tiết:
+
+WHERE p.CategoryID = 'C01': Chỉ quan tâm đến các dòng dữ liệu nhập kho thuộc danh mục C01.
+
+GROUP BY i.WarehouseID: Chia nhóm theo từng kho.
+
+COUNT(DISTINCT i.ProductID): Đếm xem mỗi kho đang giữ bao nhiêu loại sản phẩm C01 khác nhau.
+
+(SELECT COUNT(*) FROM Product WHERE CategoryID = 'C01'): Đây là truy vấn con trả về 1 con số duy nhất (trong dữ liệu của bạn, C01 có 5 sản phẩm, nên nó trả về số 5). Hệ thống sẽ tìm kho nào có số đếm ở trên bằng đúng 5.
+
+4. Câu 5.16: Tìm các sản phẩm không được lưu trữ tại kho 'W01'
+Ý tưởng Cách 2: Thay vì dùng cấu trúc loại trừ NOT IN (thường có hiệu năng kém nếu danh sách con chứa giá trị NULL), ta sử dụng toán tử liên kết LEFT JOIN giữa bảng Product với một tập dữ liệu đã được lọc sẵn của kho 'W01'. Sản phẩm nào không nằm trong kho 'W01' sẽ có giá trị trả về của kho là NULL.
+
+Mã SQL (Cách 2):
+SQL
+SELECT p.ProductID, p.ProductName
+FROM Product p
+LEFT JOIN (
+    SELECT ProductID 
+    FROM Instock 
+    WHERE WarehouseID = 'W01'
+) i ON p.ProductID = i.ProductID
+WHERE i.ProductID IS NULL;
+Giải thích chi tiết:
+
+Đoạn mã SELECT ProductID FROM Instock WHERE WarehouseID = 'W01' trích xuất ra toàn bộ danh sách các sản phẩm đang có mặt ở kho W01.
+
+Khi thực hiện LEFT JOIN bảng Product với danh sách trên, những sản phẩm nào có ở cả hai nơi sẽ được ghép cặp dòng. Ngược lại, sản phẩm nào không có ở kho W01 thì phần dữ liệu bên vế phải (bảng i) sẽ bị bỏ trống (NULL).
+
+Câu lệnh WHERE i.ProductID IS NULL chính là chìa khóa để giữ lại những sản phẩm "vắng bóng" tại kho W01 một cách triệt để.
+
+5. Câu 5.20: Tìm các sản phẩm có đơn giá cao hơn đơn giá trung bình của tất cả sản phẩm
+Ý tưởng Cách 2: Đây là nơi kỹ thuật cao cấp Window Function (Hàm cửa sổ) tỏa sáng. Thông thường ta phải viết một câu lệnh SELECT AVG(UnitPrice) riêng biệt. Nhưng với từ khóa OVER(), hệ thống sẽ tự động tính toán giá trung bình của toàn bộ bảng và gán trực tiếp vào từng dòng dữ liệu trong một bảng tạm, sau đó ta chỉ việc lọc.
+
+Mã SQL (Cách 2):
+SQL
+WITH ProductWithAvg AS (
+    SELECT ProductID, ProductName, UnitPrice,
+           AVG(UnitPrice) OVER() AS GlobalAvgPrice
+    FROM Product
+)
+SELECT ProductID, ProductName, UnitPrice, GlobalAvgPrice
+FROM ProductWithAvg
+WHERE UnitPrice > GlobalAvgPrice;
+Giải thích chi tiết:
+
+Hàm AVG(UnitPrice) OVER() AS GlobalAvgPrice tạo ra một cột mới. Tại mọi dòng sản phẩm, giá trị của cột này đều bằng nhau và bằng chính mức giá trung bình của toàn bộ 20 sản phẩm trong hệ thống (ví dụ: tất cả các dòng đều hiện số 90,000đ ở cột này).
+
+Tiếp theo, ở câu truy vấn bên dưới bảng tạm ProductWithAvg, chúng ta chỉ cần thực hiện một phép so sánh toán học đơn giản: Giá của sản phẩm đó (UnitPrice) có lớn hơn cột giá trung bình (GlobalAvgPrice) hay không. Cách viết này chạy rất nhanh và không cần phải quét lại bảng nhiều lần.
