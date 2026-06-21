@@ -366,17 +366,17 @@ DELIMITER $$
 
 CREATE PROCEDURE CostForEach()
 BEGIN
-    SELECT
-        I.WarehouseID,
-        SUM(P.UnitPrice * I.Quantity) AS TotalCost
+    SELECT I.WarehouseID,
+           SUM(P.UnitPrice * I.Quantity) AS TotalCost
     FROM Instock I
     JOIN Product P
         ON I.ProductID = P.ProductID
-    GROUP BY I.WarehouseID
-    ORDER BY I.WarehouseID;
+    GROUP BY I.WarehouseID;
 END$$
 
 DELIMITER ;
+CALL CostForEach();
+
 5.15
 DELIMITER $$
 
