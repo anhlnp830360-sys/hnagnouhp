@@ -363,6 +363,7 @@ GROUP BY
     w.WarehouseAddress
 HAVING 
     COUNT(i.ProductID) > 3;
+5.18
 
 5.19
 
@@ -378,3 +379,5 @@ HAVING SUM(i.Quantity) = (
         GROUP BY ProductID
     ) AS SubQuery
 );
+5.20
+
