@@ -20,3 +20,29 @@ END$$
 
 DELIMITER ;
 SELECT CostForWarehouse('W01');
+sửa 5.15
+DELIMITER $$
+
+CREATE FUNCTION CostForWarehouse(WID VARCHAR(10))
+RETURNS DECIMAL(15,2)
+DETERMINISTIC
+BEGIN
+    DECLARE TotalCost DECIMAL(15,2);
+
+    SELECT
+        SUM(P.UnitPrice * I.Quantity)
+    INTO TotalCost
+    FROM Instock I
+    JOIN Product P
+        ON I.ProductID = P.ProductID
+    WHERE I.WarehouseID = WID;
+
+    RETURN IFNULL(TotalCost,0);
+END$$
+
+DELIMITER ;
+SELECT CostForWarehouse('W01') AS TotalCost_W01;
+
+SELECT CostForWarehouse('W03') AS TotalCost_W03;
+
+SELECT CostForWarehouse('W05') AS TotalCost_W05;
