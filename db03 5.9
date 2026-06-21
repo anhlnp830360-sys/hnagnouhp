@@ -77,6 +77,15 @@ HAVING SUM(i.Quantity) = (
         GROUP BY ProductID
     ) AS SubQuery
 );
-
+sửa 5.19
+SELECT
+    p.ProductID,
+    p.ProductName,
+    SUM(i.Quantity) AS TotalQuantity
+FROM Product p
+JOIN Instock i
+    ON p.ProductID = i.ProductID
+GROUP BY p.ProductID, p.ProductName
+HAVING SUM(i.Quantity) > 100;
 
 
