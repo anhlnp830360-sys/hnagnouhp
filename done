@@ -215,6 +215,17 @@ FROM Warehouse w
 JOIN Category c ON w.CategoryID = c.CategoryID
 WHERE c.CategoryName = 'Beverage';
 5.4
+SELECT 
+    p.ProductID,
+    p.ProductName,
+    p.UnitPrice,
+    p.CategoryID
+FROM Product p
+WHERE p.CategoryID IN (
+    SELECT w.CategoryID 
+    FROM Warehouse w 
+    WHERE w.WarehouseID = 'W01'
+);
 5.5
 SELECT 
     w.WarehouseID, 
@@ -334,6 +345,10 @@ WHERE NOT EXISTS (
         AND i.ProductID = p.ProductID
     )
 );
+5.13
+5.14
+5.15
+5.16
 5.17
 SELECT 
     w.WarehouseID, 
