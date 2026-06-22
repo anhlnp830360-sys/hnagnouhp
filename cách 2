@@ -80,21 +80,92 @@ Khi thực hiện LEFT JOIN bảng Product với danh sách trên, những sản
 
 Câu lệnh WHERE i.ProductID IS NULL chính là chìa khóa để giữ lại những sản phẩm "vắng bóng" tại kho W01 một cách triệt để.
 
-5. Câu 5.20: Tìm các sản phẩm có đơn giá cao hơn đơn giá trung bình của tất cả sản phẩm
-Ý tưởng Cách 2: Đây là nơi kỹ thuật cao cấp Window Function (Hàm cửa sổ) tỏa sáng. Thông thường ta phải viết một câu lệnh SELECT AVG(UnitPrice) riêng biệt. Nhưng với từ khóa OVER(), hệ thống sẽ tự động tính toán giá trung bình của toàn bộ bảng và gán trực tiếp vào từng dòng dữ liệu trong một bảng tạm, sau đó ta chỉ việc lọc.
-
-Mã SQL (Cách 2):
-SQL
-WITH ProductWithAvg AS (
-    SELECT ProductID, ProductName, UnitPrice,
-           AVG(UnitPrice) OVER() AS GlobalAvgPrice
+5.ách 2 (CTE)
+WITH AvgPrice AS
+(
+    SELECT AVG(UnitPrice) AS AveragePrice
     FROM Product
 )
-SELECT ProductID, ProductName, UnitPrice, GlobalAvgPrice
-FROM ProductWithAvg
-WHERE UnitPrice > GlobalAvgPrice;
-Giải thích chi tiết:
+SELECT
+    p.ProductID,
+    p.ProductName,
+    p.UnitPrice,
+    a.AveragePrice
+FROM Product p
+CROSS JOIN AvgPrice a
+WHERE p.UnitPrice > a.AveragePrice;
+Ý tưởng
 
-Hàm AVG(UnitPrice) OVER() AS GlobalAvgPrice tạo ra một cột mới. Tại mọi dòng sản phẩm, giá trị của cột này đều bằng nhau và bằng chính mức giá trung bình của toàn bộ 20 sản phẩm trong hệ thống (ví dụ: tất cả các dòng đều hiện số 90,000đ ở cột này).
+Thay vì tính trung bình trực tiếp trong WHERE, ta:
 
+Bước 1
+
+Tạo bảng tạm AvgPrice
+
+SELECT AVG(UnitPrice) AS AveragePrice
+FROM Product
+
+Ví dụ:
+
+AveragePrice
+98000
+Bước 2
+
+Ghép giá trị trung bình này vào toàn bộ sản phẩm bằng:
+
+CROSS JOIN AvgPrice
+
+Kết quả tạm:
+
+ProductID	ProductName	UnitPrice	AveragePrice
+P01	Coca-Cola	10000	98000
+P02	Pepsi	11000	98000
+P15	Power Bank	450000	98000
+Bước 3
+
+Lọc:
+
+WHERE UnitPrice > AveragePrice
+
+để lấy các sản phẩm có giá cao hơn mức trung bình.
+
+Vì sao Cách 2 tốt hơn?
+1. Chia nhỏ bài toán
+
+Tách:
+
+Bước tính trung bình
+Bước lọc dữ liệu
+
+rõ ràng hơn.
+
+2. Dễ bảo trì
+
+Nếu sau này cần thêm:
+
+MAX(UnitPrice)
+MIN(UnitPrice)
+COUNT(*)
+
+chỉ cần sửa trong CTE.
+
+3. Dễ giải thích trong báo cáo
+
+Giáo viên nhìn vào sẽ thấy:
+
+CTE AvgPrice
+↓
+Ghép với Product
+↓
+Lọc kết quả
+
+rõ hơn nhiều so với subquery nằm trong WHERE.
+
+4. Hiển thị được giá trung bình
+
+Kết quả có thêm:
+
+AveragePrice
+
+để chứng minh truy vấn hoạt động đúng.
 Tiếp theo, ở câu truy vấn bên dưới bảng tạm ProductWithAvg, chúng ta chỉ cần thực hiện một phép so sánh toán học đơn giản: Giá của sản phẩm đó (UnitPrice) có lớn hơn cột giá trung bình (GlobalAvgPrice) hay không. Cách viết này chạy rất nhanh và không cần phải quét lại bảng nhiều lần.
